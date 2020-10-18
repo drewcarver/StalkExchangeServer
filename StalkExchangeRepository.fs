@@ -2,12 +2,13 @@ module StalkExchangeRepository
 
 open MongoDB.Bson
 open MongoDB.Driver
-open System
 open System.Linq
 open Microsoft.FSharp.Collections
 open FSharp.Control.Tasks.V2.ContextSensitive
 open System.Threading.Tasks
-open System.Collections.Generic
+open Exchange
+open Market
+open Bells
 
 [<Literal>]
 let ConnectionString = ""
@@ -18,38 +19,17 @@ let DbName = "stalkExchange"
 [<Literal>]
 let CollectionName = "marketWeeks"
 
-type Bells = int
-
-[<CLIMutable>]
-type Market = {
-    UserName        : string
-    PurchasePrice   : Bells option
-    MondayPrice     : Bells option
-    TuesdayPrice    : Bells option
-    WednesdayPrice  : Bells option 
-    ThursdayPrice   : Bells option 
-    FridayPrice     : Bells option
-    SaturdayPrice   : Bells option
-}
-
-[<CLIMutable>]
-type MarketWeek = { 
-    Id              : BsonObjectId 
-    WeekStartDate   : DateTime
-    WeekEndDate     : DateTime
-    Markets         : IEnumerable<Market> 
-} 
 
 let client              = MongoClient(ConnectionString)
 let db                  = client.GetDatabase(DbName)
-let marketCollection    = db.GetCollection<MarketWeek>(CollectionName)
+let marketCollection    = db.GetCollection<Exchange>(CollectionName)
 
-let filterCurrentMarketById marketId = Builders<MarketWeek>.Filter.Eq((fun m -> m.Id), marketId)
-let filterCurrentMarketByStartDate marketStartDate = Builders<MarketWeek>.Filter.Eq((fun m -> m.WeekStartDate), marketStartDate)
+let filterCurrentMarketById marketId = Builders<Exchange>.Filter.Eq((fun m -> m.Id), marketId)
+let filterCurrentMarketByStartDate marketStartDate = Builders<Exchange>.Filter.Eq((fun m -> m.WeekStartDate), marketStartDate)
 
 let getMarketByWeek weekStartDate = 
     task {
-        let! markets = marketCollection.FindAsync<MarketWeek>(filterCurrentMarketByStartDate weekStartDate)
+        let! markets = marketCollection.FindAsync<Exchange>(filterCurrentMarketByStartDate weekStartDate)
 
         return markets.ToEnumerable()
             |> Enumerable.ToArray 
@@ -58,14 +38,14 @@ let getMarketByWeek weekStartDate =
 
 let getMarketById marketId =
     task {
-        let! markets = marketCollection.FindAsync<MarketWeek>(filterCurrentMarketById marketId)
+        let! markets = marketCollection.FindAsync<Exchange>(filterCurrentMarketById marketId)
 
         return markets.ToEnumerable()
             |> Enumerable.ToArray
             |> Array.tryHead
     } |> Async.AwaitTask
 
-let createMarketWeek weekStartDate weekEndDate =
+let createExchange weekStartDate weekEndDate =
     marketCollection.InsertOneAsync {
         Id              = BsonObjectId(ObjectId.GenerateNewId())
         WeekStartDate   = weekStartDate
@@ -74,9 +54,9 @@ let createMarketWeek weekStartDate weekEndDate =
     } |> Async.AwaitTask
 
 let createMarket weekStartDate username = 
-    let marketToAdd: Market = {
+    let newMarket: Market = {
         UserName        = username
-        PurchasePrice   = Some 50
+        PurchasePrice   = None
         MondayPrice     = None 
         TuesdayPrice    = None
         WednesdayPrice  = None
@@ -84,7 +64,7 @@ let createMarket weekStartDate username =
         FridayPrice     = None
         SaturdayPrice   = None
     }
-    let updateDefinition = Builders<MarketWeek>.Update.AddToSet((fun marketWeek -> marketWeek.Markets), marketToAdd)
+    let updateDefinition = Builders<Exchange>.Update.AddToSet((fun marketWeek -> marketWeek.Markets), newMarket)
     let options = UpdateOptions(IsUpsert = true)
     
     task {
@@ -93,7 +73,7 @@ let createMarket weekStartDate username =
         return! match result.IsAcknowledged with
                 | true -> 
                     task { 
-                        let! markets = marketCollection.FindAsync<MarketWeek>(filterCurrentMarketById (BsonObjectId(result.UpsertedId.AsObjectId)))
+                        let! markets = marketCollection.FindAsync<Exchange>(filterCurrentMarketById (BsonObjectId(result.UpsertedId.AsObjectId)))
 
                         return markets.ToEnumerable()
                             |> Enumerable.ToArray
@@ -104,13 +84,13 @@ let createMarket weekStartDate username =
 
 let addPurchasePrice (username: string) (purchasePrice: Bells) (marketId: BsonObjectId) =
     task {
-        let filter = Builders<MarketWeek>.Filter
+        let filter = Builders<Exchange>.Filter
         let marketIdAndUsernameFilter = filter.And(
             filter.Eq((fun m -> m.Id), marketId),
             filter.ElemMatch((fun m -> m.Markets), (fun m -> m.UserName = username))
         )
 
-        let update = Builders<MarketWeek>.Update
+        let update = Builders<Exchange>.Update
         let purchasePriceSetter = update.Set((fun m -> m.Markets.First().PurchasePrice), Some purchasePrice)
         
         marketCollection.UpdateOneAsync(marketIdAndUsernameFilter, purchasePriceSetter, UpdateOptions(IsUpsert = true)) |> ignore

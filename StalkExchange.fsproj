@@ -5,7 +5,13 @@
     <AzureFunctionsVersion>v3</AzureFunctionsVersion>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="utilities/ResultUtilities.fs" />
+    <Compile Include="models/Bells.fs" />
+    <Compile Include="models/Market.fs" />
+    <Compile Include="models/Exchange.fs" />
     <Compile Include="StalkExchangeRepository.fs" />
+    <Compile Include="handlers/GetMarketHandler.fs" />
+    <Compile Include="handlers/CreateMarketHandler.fs" />
     <Compile Include="Run.fs" />
     <Compile Include="Startup.fs" />
   </ItemGroup>
