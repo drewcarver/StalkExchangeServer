@@ -5,13 +5,8 @@ open Microsoft.AspNetCore.Http
 open FSharp.Control.Tasks.V2
 open System
 open ResultUtilities
+open DateUtility
 
-let parseDate (dateString: string) =
-  let couldParse, parsedDate = System.DateTime.TryParse(dateString)
-
-  if couldParse 
-    then Ok parsedDate 
-    else Error (RequestErrors.NOT_FOUND "Invalid Date.")
 
 let validateWeekStartDate (weekStartDate: DateTime) =
   let dayOfWeek = Enum.GetName(typeof<DayOfWeek>, weekStartDate.ToUniversalTime().DayOfWeek)

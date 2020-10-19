@@ -73,22 +73,21 @@ let createMarket weekStartDate username =
         SaturdayPrice   = None
     }
     let updateDefinition = Builders<Exchange>.Update.AddToSet((fun marketWeek -> marketWeek.Markets), newMarket)
-    let options = UpdateOptions(IsUpsert = true)
+    let options = UpdateOptions(IsUpsert = false)
     
     task {
         let! result = marketCollection.UpdateOneAsync(filterCurrentMarketByStartDate weekStartDate, updateDefinition, options)
         
-        return! match result.IsAcknowledged with
-                | true -> 
-                    task { 
+        return! if result.IsAcknowledged
+            then task { 
                         let! markets = marketCollection.FindAsync<Exchange>(filterCurrentMarketById (BsonObjectId(result.UpsertedId.AsObjectId)))
 
                         return markets.ToEnumerable()
                             |> Enumerable.ToArray
                             |> Array.tryHead
-                    }
-                | false -> Task.FromResult(None)
-    } |> Async.AwaitTask
+            }
+            else Task.FromResult(None)
+    } 
 
 let addPurchasePrice (username: string) (purchasePrice: Bells) (marketId: BsonObjectId) =
     task {

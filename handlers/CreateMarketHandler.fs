@@ -4,19 +4,31 @@ open Giraffe
 open Microsoft.AspNetCore.Http
 open FSharp.Control.Tasks.V2
 open System
+open DateUtility
+open ResultUtilities 
 
 [<CLIMutable>] 
 type CreateExchangeModel =
   { 
-    WeekStartDate: DateTime
     UserName: string
   }
 
-let CreateMarketHandler: HttpHandler =
+let createMarket (username: string) (weekStartDate: DateTime) = 
+  task { 
+    let! exchange = StalkExchangeRepository.createMarket weekStartDate username
+
+    return match exchange with
+            | Some e  -> Ok e 
+            | None    -> Error (RequestErrors.CONFLICT "Unable to create market.")
+  }
+
+let createMarketHandler (weekStartDateString: string): HttpHandler =
   fun (next : HttpFunc) (ctx : HttpContext) ->
+    let weekStartDate = parseDate weekStartDateString
+
     task {
       let! createExchangeModel = ctx.BindJsonAsync<CreateExchangeModel>()
-      let! result = StalkExchangeRepository.createExchange createExchangeModel.WeekStartDate 
+      let! result = parseDate weekStartDateString >>=! createMarket createExchangeModel.UserName
 
       return! match result with
               | Ok r  -> Successful.CREATED r next ctx
