@@ -1,4 +1,4 @@
-module CreateMarketHandler
+module CreateExchangeHandler
 
 open Giraffe
 open Microsoft.AspNetCore.Http
@@ -8,11 +8,10 @@ open System
 [<CLIMutable>] 
 type CreateExchangeModel =
   { 
-    WeekStartDate: DateTime
-    UserName: string
+    WeekStartDate : DateTime
   }
 
-let CreateMarketHandler: HttpHandler =
+let createExchangeHandler : HttpHandler =
   fun (next : HttpFunc) (ctx : HttpContext) ->
     task {
       let! createExchangeModel = ctx.BindJsonAsync<CreateExchangeModel>()

@@ -7,16 +7,18 @@ open Microsoft.Azure.WebJobs.Extensions.Http
 open System.Threading.Tasks
 open FSharp.Control.Tasks.V2
 open Microsoft.Extensions.Logging
-open GetMarketHandler
-open CreateMarketHandler 
+open GetExchangeHandler
+open CreateExchangeHandler
 
 let app : HttpHandler =
 
   choose [
 
-    POST  >=> route "/api/exchange" >=> warbler (fun _ -> createMarketHandler)
+    POST  >=> route "/api/exchange" >=> warbler (fun _ -> createExchangeHandler)
 
-    GET   >=> routef "/api/exchange/%s" getMarketHandler
+    GET   >=> routef "/api/exchange/%s" getExchangeHandler
+
+    POST  >=> routef "/api/exchange/%s/markets" warbler (fun _ -> createMarketsHandler) 
 
     RequestErrors.NOT_FOUND "Not Found"
 

@@ -1,4 +1,4 @@
-module GetMarketHandler
+module GetExchangeHandler
 
 open Giraffe
 open Microsoft.AspNetCore.Http
@@ -21,9 +21,9 @@ let validateWeekStartDate (weekStartDate: DateTime) =
     else Error (RequestErrors.BAD_REQUEST (sprintf "Please Provide a Valid Week Start Date. The Date Provided Is Not a Sunday. Instead Was Given: %s" dayOfWeek))
 
 
-let getMarkets (weekStartDate: DateTime) = 
+let getExchange (weekStartDate: DateTime) = 
   task { 
-    let! markets = StalkExchangeRepository.getMarketByWeek weekStartDate
+    let! markets = StalkExchangeRepository.getExchangeByWeek weekStartDate
 
     return match markets with
             | Some m  -> Ok m 
@@ -31,10 +31,10 @@ let getMarkets (weekStartDate: DateTime) =
   }
 
 
-let getMarketHandler (weekStartDateString: string) : HttpHandler =
+let getExchangeHandler (weekStartDateString: string) : HttpHandler =
   fun (next : HttpFunc) (ctx : HttpContext) ->
     task {
-      let! result = parseDate weekStartDateString >>= validateWeekStartDate >>=! getMarkets
+      let! result = parseDate weekStartDateString >>= validateWeekStartDate >>=! getExchange
 
       return! match result with
               | Ok markets  -> Successful.OK markets next ctx

@@ -27,7 +27,7 @@ let marketCollection    = db.GetCollection<Exchange>(CollectionName)
 let filterCurrentMarketById marketId = Builders<Exchange>.Filter.Eq((fun m -> m.Id), marketId)
 let filterCurrentMarketByStartDate marketStartDate = Builders<Exchange>.Filter.Eq((fun m -> m.WeekStartDate), marketStartDate)
 
-let getMarketByWeek weekStartDate = 
+let getExchangeByWeek weekStartDate = 
     task {
         let! markets = marketCollection.FindAsync<Exchange>(filterCurrentMarketByStartDate weekStartDate)
 
@@ -45,13 +45,21 @@ let getMarketById marketId =
             |> Array.tryHead
     } |> Async.AwaitTask
 
-let createExchange weekStartDate weekEndDate =
-    marketCollection.InsertOneAsync {
-        Id              = BsonObjectId(ObjectId.GenerateNewId())
-        WeekStartDate   = weekStartDate
-        WeekEndDate     = weekEndDate
-        Markets         = []
-    } |> Async.AwaitTask
+let createExchange weekStartDate =
+        try
+            task {
+                let! _ = marketCollection.InsertOneAsync {
+                    Id              = BsonObjectId(ObjectId.GenerateNewId())
+                    WeekStartDate   = weekStartDate
+                    Markets         = []
+                } 
+
+                let! savedWeek = marketCollection.FindAsync<Exchange>(filterCurrentMarketByStartDate weekStartDate)
+                
+                return Ok(savedWeek.ToList().FirstOrDefault())
+            }
+        with
+        | _ -> Error("An exchange with that start date already exists.") |> Task.FromResult
 
 let createMarket weekStartDate username = 
     let newMarket: Market = {

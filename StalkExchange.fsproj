@@ -10,8 +10,9 @@
     <Compile Include="models/Market.fs" />
     <Compile Include="models/Exchange.fs" />
     <Compile Include="StalkExchangeRepository.fs" />
+    <Compile Include="handlers/GetExchangeHandler.fs" />
     <Compile Include="handlers/GetMarketHandler.fs" />
-    <Compile Include="handlers/CreateMarketHandler.fs" />
+    <Compile Include="handlers/CreateExchangeHandler.fs" />
     <Compile Include="Run.fs" />
     <Compile Include="Startup.fs" />
   </ItemGroup>

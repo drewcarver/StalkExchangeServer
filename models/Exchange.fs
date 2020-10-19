@@ -9,6 +9,5 @@ open System.Collections.Generic
 type Exchange = { 
     Id              : BsonObjectId 
     WeekStartDate   : DateTime
-    WeekEndDate     : DateTime
     Markets         : IEnumerable<Market> 
 } 
