@@ -24,8 +24,6 @@ let createMarket (username: string) (weekStartDate: DateTime) =
 
 let createMarketHandler (weekStartDateString: string): HttpHandler =
   fun (next : HttpFunc) (ctx : HttpContext) ->
-    let weekStartDate = parseDate weekStartDateString
-
     task {
       let! createExchangeModel = ctx.BindJsonAsync<CreateExchangeModel>()
       let! result = parseDate weekStartDateString >>=! createMarket createExchangeModel.UserName
