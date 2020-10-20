@@ -38,7 +38,7 @@ let updateMarket (username: string) (market: MarketModel) (weekStartDate: DateTi
             | None    -> Error (RequestErrors.CONFLICT "Unable to update market.")
   }
 
-let createMarketHandler (weekStartDateString: string) (username: string): HttpHandler =
+let updateMarketHandler (weekStartDateString: string) (username: string): HttpHandler =
   fun (next : HttpFunc) (ctx : HttpContext) ->
     task {
       let! marketModel = ctx.BindJsonAsync<MarketModel>()

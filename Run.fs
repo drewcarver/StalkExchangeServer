@@ -10,6 +10,7 @@ open Microsoft.Extensions.Logging
 open GetExchangeHandler
 open CreateExchangeHandler
 open CreateMarketHandler
+open UpdateMarketHandler
 
 let app : HttpHandler =
 
@@ -21,7 +22,7 @@ let app : HttpHandler =
 
     POST  >=> routef "/api/exchange/%s/markets" createMarketHandler
 
-    PUT   >=> routef "/api/exchange/%s/markets/%s" updateMarketHandler
+    PUT   >=> routef "/api/exchange/%s/markets/%s" (fun (weekStartDate, username) -> updateMarketHandler weekStartDate username)
 
     RequestErrors.NOT_FOUND "Not Found"
 
