@@ -9,6 +9,7 @@ open FSharp.Control.Tasks.V2
 open Microsoft.Extensions.Logging
 open GetExchangeHandler
 open CreateExchangeHandler
+open CreateMarketHandler
 
 let app : HttpHandler =
 
@@ -18,7 +19,9 @@ let app : HttpHandler =
 
     GET   >=> routef "/api/exchange/%s" getExchangeHandler
 
-    POST  >=> routef "/api/exchange/%s/markets" warbler (fun _ -> createMarketsHandler) 
+    POST  >=> routef "/api/exchange/%s/markets" createMarketHandler
+
+    PUT   >=> routef "/api/exchange/%s/markets/%s" updateMarketHandler
 
     RequestErrors.NOT_FOUND "Not Found"
 

@@ -9,6 +9,7 @@ open System.Threading.Tasks
 open Exchange
 open Market
 open Bells
+open System
 
 [<Literal>]
 let ConnectionString = ""
@@ -24,12 +25,13 @@ let client              = MongoClient(ConnectionString)
 let db                  = client.GetDatabase(DbName)
 let marketCollection    = db.GetCollection<Exchange>(CollectionName)
 
-let filterCurrentMarketById marketId = Builders<Exchange>.Filter.Eq((fun m -> m.Id), marketId)
-let filterCurrentMarketByStartDate marketStartDate = Builders<Exchange>.Filter.Eq((fun m -> m.WeekStartDate), marketStartDate)
+let filterCurrentExchangeById marketId = Builders<Exchange>.Filter.Eq((fun m -> m.Id), marketId)
+let filterCurrentExchangeByStartDate marketStartDate = Builders<Exchange>.Filter.Eq((fun m -> m.WeekStartDate), marketStartDate)
+let filterByMarketUsername username = Builders<Exchange>.Filter.ElemMatch((fun e -> e.Markets), (fun m -> m.UserName = username))
 
 let getExchangeByWeek weekStartDate = 
     task {
-        let! markets = marketCollection.FindAsync<Exchange>(filterCurrentMarketByStartDate weekStartDate)
+        let! markets = marketCollection.FindAsync<Exchange>(filterCurrentExchangeByStartDate weekStartDate)
 
         return markets.ToEnumerable()
             |> Enumerable.ToArray 
@@ -38,7 +40,7 @@ let getExchangeByWeek weekStartDate =
 
 let getMarketById marketId =
     task {
-        let! markets = marketCollection.FindAsync<Exchange>(filterCurrentMarketById marketId)
+        let! markets = marketCollection.FindAsync<Exchange>(filterCurrentExchangeById marketId)
 
         return markets.ToEnumerable()
             |> Enumerable.ToArray
@@ -54,7 +56,7 @@ let createExchange weekStartDate =
                     Markets         = []
                 } 
 
-                let! savedWeek = marketCollection.FindAsync<Exchange>(filterCurrentMarketByStartDate weekStartDate)
+                let! savedWeek = marketCollection.FindAsync<Exchange>(filterCurrentExchangeByStartDate weekStartDate)
                 
                 return Ok(savedWeek.ToList().FirstOrDefault())
             }
@@ -76,11 +78,11 @@ let createMarket weekStartDate username =
     let options = UpdateOptions(IsUpsert = true)
     
     task {
-        let! result = marketCollection.UpdateOneAsync(filterCurrentMarketByStartDate weekStartDate, updateDefinition, options)
+        let! result = marketCollection.UpdateOneAsync(filterCurrentExchangeByStartDate weekStartDate, updateDefinition, options)
         
         return! if result.IsAcknowledged
             then task { 
-                        let! markets = marketCollection.FindAsync<Exchange>(filterCurrentMarketById (BsonObjectId(result.UpsertedId.AsObjectId)))
+                        let! markets = marketCollection.FindAsync<Exchange>(filterCurrentExchangeById (BsonObjectId(result.UpsertedId.AsObjectId)))
 
                         return markets.ToEnumerable()
                             |> Enumerable.ToArray
@@ -89,16 +91,17 @@ let createMarket weekStartDate username =
             else Task.FromResult(None)
     } 
 
-let updateMarket weekStartDate market = 
-    let updateDefinition = Builders<Exchange>.Update.AddToSet((fun marketWeek -> marketWeek.Markets), market)
-    let options = UpdateOptions(IsUpsert = true)
+let updateMarket (weekStartDate: DateTime) (market: Market.Market) = 
+    let filter = Builders<Exchange>.Filter.And(filterCurrentExchangeByStartDate weekStartDate, filterByMarketUsername market.UserName)
+    let updateDefinition = Builders<Exchange>.Update.Set((fun e -> e.Markets.First()), market)
+    let options = UpdateOptions(IsUpsert = false)
     
     task {
-        let! result = marketCollection.UpdateOneAsync(filterCurrentMarketByStartDate weekStartDate, updateDefinition, options)
+        let! result = marketCollection.UpdateOneAsync(filter, updateDefinition, options)
         
         return! if result.IsAcknowledged
             then task { 
-                        let! markets = marketCollection.FindAsync<Exchange>(filterCurrentMarketById (BsonObjectId(result.UpsertedId.AsObjectId)))
+                        let! markets = marketCollection.FindAsync<Exchange>(filterCurrentExchangeById (BsonObjectId(result.UpsertedId.AsObjectId)))
 
                         return markets.ToEnumerable()
                             |> Enumerable.ToArray
