@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="utilities/ResultUtilities.fs" />
+    <Compile Include="utilities/DateUtility.fs" />
+    <Compile Include="models/Bells.fs" />
+    <Compile Include="models/Market.fs" />
+    <Compile Include="models/Exchange.fs" />
+    <Compile Include="StalkExchangeRepository.fs" />
+    <Compile Include="handlers/CreateExchangeHandler.fs" />
+    <Compile Include="handlers/GetExchangeHandler.fs" />
+    <Compile Include="handlers/CreateMarketHandler.fs" />
+    <Compile Include="handlers/UpdateMarketHandler.fs" />
+    <Compile Include="Run.fs" />
+    <Compile Include="Startup.fs" />
+    <Compile Include="tests/*" />
+    <Content Include="host.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="local.settings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="FsUnit" Version="4.0.1" />
+    <PackageReference Include="Giraffe" Version="4.1.0" />
+    <PackageReference Include="Microsoft.Azure.Functions.Extensions" Version="1.0.0" />
+    <PackageReference Include="mongocsharpdriver" Version="2.11.1" />
+    <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="3.0.9" />
+    <PackageReference Include="MongoDb.FSharp" Version="0.1.0" />
+    <PackageReference Include="xUnit" Version="2.4.1" />
+  </ItemGroup>
+</Project>
