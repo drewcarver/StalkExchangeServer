@@ -15,7 +15,7 @@ type CreateExchangeModel =
 
 let createMarket (username: string) (weekStartDate: DateTime) = 
   task { 
-    let! exchange = StalkExchangeRepository.createMarket weekStartDate username
+    let! exchange = StalkExchangeRepository.getExchangeCollection () |> StalkExchangeRepository.createMarket weekStartDate username
 
     return match exchange with
             | Some e  -> Ok e 

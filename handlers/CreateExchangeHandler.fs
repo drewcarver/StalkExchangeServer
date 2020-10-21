@@ -15,7 +15,7 @@ let createExchangeHandler : HttpHandler =
   fun (next : HttpFunc) (ctx : HttpContext) ->
     task {
       let! createExchangeModel = ctx.BindJsonAsync<CreateExchangeModel>()
-      let! result = StalkExchangeRepository.createExchange createExchangeModel.WeekStartDate 
+      let! result = StalkExchangeRepository.getExchangeCollection () |> StalkExchangeRepository.createExchange createExchangeModel.WeekStartDate 
 
       return! match result with
               | Ok r  -> Successful.CREATED r next ctx

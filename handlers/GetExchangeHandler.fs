@@ -18,7 +18,7 @@ let validateWeekStartDate (weekStartDate: DateTime) =
 
 let getExchange (weekStartDate: DateTime) = 
   task { 
-    let! markets = StalkExchangeRepository.getExchangeByWeek weekStartDate
+    let! markets = StalkExchangeRepository.getExchangeCollection () |> StalkExchangeRepository.getExchangeByWeek weekStartDate
 
     return match markets with
             | Some m  -> Ok m 
@@ -32,6 +32,6 @@ let getExchangeHandler (weekStartDateString: string) : HttpHandler =
       let! result = parseDate weekStartDateString >>= validateWeekStartDate >>=! getExchange
 
       return! match result with
-              | Ok markets  -> Successful.OK markets next ctx
+              | Ok exchange  -> Successful.OK (Exchange.toExchangeResponse exchange) next ctx
               | Error error -> error next ctx
     }

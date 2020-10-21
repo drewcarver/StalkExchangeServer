@@ -8,30 +8,32 @@ open Giraffe
 open ResultUtilities
 open Bells
 
+[<CLIMutable>]
 type MarketModel = {
-  PurchasePrice   : Bells option
-  MondayPrice     : Bells option
-  TuesdayPrice    : Bells option
-  WednesdayPrice  : Bells option 
-  ThursdayPrice   : Bells option 
-  FridayPrice     : Bells option
-  SaturdayPrice   : Bells option
+  PurchasePrice   : Nullable<Bells>
+  MondayPrice     : Nullable<Bells> 
+  TuesdayPrice    : Nullable<Bells> 
+  WednesdayPrice  : Nullable<Bells> 
+  ThursdayPrice   : Nullable<Bells> 
+  FridayPrice     : Nullable<Bells> 
+  SaturdayPrice   : Nullable<Bells> 
 }
 
-let updateMarket (username: string) (market: MarketModel) (weekStartDate: DateTime) = 
-  task { 
-    let newMarket: Market.Market = { 
+let toMarket (username: string) (market: MarketModel) : Market.Market =
+  { 
       UserName        = username;
-      PurchasePrice   = market.PurchasePrice;
-      MondayPrice     = market.MondayPrice;
-      TuesdayPrice    = market.TuesdayPrice;
-      WednesdayPrice  = market.WednesdayPrice;
-      ThursdayPrice   = market.ThursdayPrice;
-      FridayPrice     = market.FridayPrice;
-      SaturdayPrice   = market.SaturdayPrice;
-    }
-    let! exchange = StalkExchangeRepository.updateMarket weekStartDate newMarket
-    
+      PurchasePrice   = Option.ofNullable(market.PurchasePrice);
+      MondayPrice     = Option.ofNullable(market.MondayPrice);
+      TuesdayPrice    = Option.ofNullable(market.TuesdayPrice);
+      WednesdayPrice  = Option.ofNullable(market.WednesdayPrice);
+      ThursdayPrice   = Option.ofNullable(market.ThursdayPrice);
+      FridayPrice     = Option.ofNullable(market.FridayPrice);
+      SaturdayPrice   = Option.ofNullable(market.SaturdayPrice);
+  }
+
+let updateMarket (market: Market.Market) (weekStartDate: DateTime) = 
+  task { 
+    let! exchange = StalkExchangeRepository.getExchangeCollection () |> StalkExchangeRepository.updateMarket weekStartDate market 
 
     return match exchange with
             | Some e  -> Ok e 
@@ -42,9 +44,10 @@ let updateMarketHandler (weekStartDateString: string) (username: string): HttpHa
   fun (next : HttpFunc) (ctx : HttpContext) ->
     task {
       let! marketModel = ctx.BindJsonAsync<MarketModel>()
-      let! result = parseDate weekStartDateString >>=! updateMarket username marketModel
+      let market = toMarket username marketModel
+      let! result = parseDate weekStartDateString >>=! updateMarket market
 
       return! match result with
-              | Ok r  -> Successful.CREATED r next ctx
+              | Ok r  -> Successful.CREATED (Exchange.toExchangeResponse r) next ctx
               | Error e -> ServerErrors.INTERNAL_ERROR e next ctx
     }
