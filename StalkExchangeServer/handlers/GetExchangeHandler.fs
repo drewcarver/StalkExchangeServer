@@ -15,10 +15,9 @@ let validateWeekStartDate (weekStartDate: DateTime) =
     then Ok weekStartDate 
     else Error (RequestErrors.BAD_REQUEST (sprintf "Please Provide a Valid Week Start Date. The Date Provided Is Not a Sunday. Instead Was Given: %s" dayOfWeek))
 
-
-let getExchange (weekStartDate: DateTime) = 
+let getExchange (getExchange: DateTime -> Async<Exchange.Exchange option>) (weekStartDate: DateTime) = 
   task { 
-    let! markets = StalkExchangeRepository.getExchangeCollection () |> StalkExchangeRepository.getExchangeByWeek weekStartDate
+    let! markets = getExchange weekStartDate
 
     return match markets with
             | Some m  -> Ok m 
@@ -29,7 +28,8 @@ let getExchange (weekStartDate: DateTime) =
 let getExchangeHandler (weekStartDateString: string) : HttpHandler =
   fun (next : HttpFunc) (ctx : HttpContext) ->
     task {
-      let! result = parseDate weekStartDateString >>= validateWeekStartDate >>=! getExchange
+      let getExchangeFromDb = StalkExchangeRepository.getExchangeCollection () |> StalkExchangeRepository.getExchangeByWeek 
+      let! result = parseDate weekStartDateString >>= validateWeekStartDate >>=! (getExchange getExchangeFromDb)
 
       return! match result with
               | Ok exchange  -> Successful.OK (Exchange.toExchangeResponse exchange) next ctx

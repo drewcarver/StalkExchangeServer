@@ -28,7 +28,7 @@ let filterCurrentExchangeById marketId = Builders<Exchange>.Filter.Eq((fun m -> 
 let filterCurrentExchangeByStartDate marketStartDate = Builders<Exchange>.Filter.Eq((fun m -> m.WeekStartDate), marketStartDate)
 let filterByMarketUsername username = Builders<Exchange>.Filter.ElemMatch((fun e -> e.Markets), (fun (m: Market.Market) -> m.UserName = username))
 
-let getExchangeByWeek (weekStartDate: DateTime) (exchangeCollection: IMongoCollection<Exchange>) = 
+let getExchangeByWeek (exchangeCollection: IMongoCollection<Exchange>) (weekStartDate: DateTime) = 
     task {
         let! markets = exchangeCollection.FindAsync<Exchange>(filterCurrentExchangeByStartDate weekStartDate)
 
