@@ -142,3 +142,5 @@ C:\Users\drewc\Projects\StalkExchangeServer\StalkExchangeServer.Test\bin\Debug\n
 C:\Users\drewc\Projects\StalkExchangeServer\StalkExchangeServer.Test\bin\Debug\netcoreapp3.1\runtimes\win\native\snappy64.dll
 C:\Users\drewc\Projects\StalkExchangeServer\StalkExchangeServer.Test\bin\Debug\netcoreapp3.1\StalkExchange.dll
 C:\Users\drewc\Projects\StalkExchangeServer\StalkExchangeServer.Test\bin\Debug\netcoreapp3.1\StalkExchange.pdb
+C:\Users\drewc\Projects\StalkExchangeServer\StalkExchangeServer.Test\bin\Debug\netcoreapp3.1\Castle.Core.dll
+C:\Users\drewc\Projects\StalkExchangeServer\StalkExchangeServer.Test\bin\Debug\netcoreapp3.1\NSubstitute.dll

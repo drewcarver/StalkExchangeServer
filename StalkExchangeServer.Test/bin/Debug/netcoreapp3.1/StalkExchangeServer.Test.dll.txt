@@ -1,0 +1,1 @@
+GetExchangeHandlerTest.Should return not found when exchange is missing

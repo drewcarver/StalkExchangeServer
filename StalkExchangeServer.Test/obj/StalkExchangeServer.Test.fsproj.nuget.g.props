@@ -32,6 +32,7 @@
     <PkgMicrosoft_Azure_WebJobs_Script_ExtensionsMetadataGenerator Condition=" '$(PkgMicrosoft_Azure_WebJobs_Script_ExtensionsMetadataGenerator)' == '' ">C:\Users\drewc\.nuget\packages\microsoft.azure.webjobs.script.extensionsmetadatagenerator\1.1.8</PkgMicrosoft_Azure_WebJobs_Script_ExtensionsMetadataGenerator>
     <PkgMicrosoft_NET_Sdk_Functions Condition=" '$(PkgMicrosoft_NET_Sdk_Functions)' == '' ">C:\Users\drewc\.nuget\packages\microsoft.net.sdk.functions\3.0.9</PkgMicrosoft_NET_Sdk_Functions>
     <PkgFsUnit Condition=" '$(PkgFsUnit)' == '' ">C:\Users\drewc\.nuget\packages\fsunit\4.0.1</PkgFsUnit>
+    <PkgNSubstitute Condition=" '$(PkgNSubstitute)' == '' ">C:\Users\drewc\.nuget\packages\nsubstitute\4.2.2</PkgNSubstitute>
     <Pkgcoverlet_collector Condition=" '$(Pkgcoverlet_collector)' == '' ">C:\Users\drewc\.nuget\packages\coverlet.collector\1.2.0</Pkgcoverlet_collector>
   </PropertyGroup>
 </Project>

@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "c:\\Users\\drewc\\Projects\\StalkExchangeServer\\StalkExchangeServer.Test\\StalkExchangeServer.Test.fsproj": {}
+    "C:\\Users\\drewc\\Projects\\StalkExchangeServer\\StalkExchangeServer.Test\\StalkExchangeServer.Test.fsproj": {}
   },
   "projects": {
-    "c:\\Users\\drewc\\Projects\\StalkExchangeServer\\StalkExchangeServer.Test\\StalkExchangeServer.Test.fsproj": {
+    "C:\\Users\\drewc\\Projects\\StalkExchangeServer\\StalkExchangeServer.Test\\StalkExchangeServer.Test.fsproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "c:\\Users\\drewc\\Projects\\StalkExchangeServer\\StalkExchangeServer.Test\\StalkExchangeServer.Test.fsproj",
+        "projectUniqueName": "C:\\Users\\drewc\\Projects\\StalkExchangeServer\\StalkExchangeServer.Test\\StalkExchangeServer.Test.fsproj",
         "projectName": "StalkExchangeServer.Test",
-        "projectPath": "c:\\Users\\drewc\\Projects\\StalkExchangeServer\\StalkExchangeServer.Test\\StalkExchangeServer.Test.fsproj",
+        "projectPath": "C:\\Users\\drewc\\Projects\\StalkExchangeServer\\StalkExchangeServer.Test\\StalkExchangeServer.Test.fsproj",
         "packagesPath": "C:\\Users\\drewc\\.nuget\\packages\\",
-        "outputPath": "c:\\Users\\drewc\\Projects\\StalkExchangeServer\\StalkExchangeServer.Test\\obj\\",
+        "outputPath": "C:\\Users\\drewc\\Projects\\StalkExchangeServer\\StalkExchangeServer.Test\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\drewc\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -25,8 +25,8 @@
         "frameworks": {
           "netcoreapp3.1": {
             "projectReferences": {
-              "c:\\Users\\drewc\\Projects\\StalkExchangeServer\\StalkExchangeServer\\StalkExchange.fsproj": {
-                "projectPath": "c:\\Users\\drewc\\Projects\\StalkExchangeServer\\StalkExchangeServer\\StalkExchange.fsproj"
+              "C:\\Users\\drewc\\Projects\\StalkExchangeServer\\StalkExchangeServer\\StalkExchange.fsproj": {
+                "projectPath": "C:\\Users\\drewc\\Projects\\StalkExchangeServer\\StalkExchangeServer\\StalkExchange.fsproj"
               }
             }
           }
@@ -48,6 +48,11 @@
             "Microsoft.NET.Test.Sdk": {
               "target": "Package",
               "version": "[16.5.0, )",
+              "generatePathProperty": true
+            },
+            "NSubstitute": {
+              "target": "Package",
+              "version": "[4.2.2, )",
               "generatePathProperty": true
             },
             "coverlet.collector": {
@@ -85,14 +90,14 @@
         }
       }
     },
-    "c:\\Users\\drewc\\Projects\\StalkExchangeServer\\StalkExchangeServer\\StalkExchange.fsproj": {
+    "C:\\Users\\drewc\\Projects\\StalkExchangeServer\\StalkExchangeServer\\StalkExchange.fsproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "c:\\Users\\drewc\\Projects\\StalkExchangeServer\\StalkExchangeServer\\StalkExchange.fsproj",
+        "projectUniqueName": "C:\\Users\\drewc\\Projects\\StalkExchangeServer\\StalkExchangeServer\\StalkExchange.fsproj",
         "projectName": "StalkExchange",
-        "projectPath": "c:\\Users\\drewc\\Projects\\StalkExchangeServer\\StalkExchangeServer\\StalkExchange.fsproj",
+        "projectPath": "C:\\Users\\drewc\\Projects\\StalkExchangeServer\\StalkExchangeServer\\StalkExchange.fsproj",
         "packagesPath": "C:\\Users\\drewc\\.nuget\\packages\\",
-        "outputPath": "c:\\Users\\drewc\\Projects\\StalkExchangeServer\\StalkExchangeServer\\obj\\",
+        "outputPath": "C:\\Users\\drewc\\Projects\\StalkExchangeServer\\StalkExchangeServer\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\drewc\\AppData\\Roaming\\NuGet\\NuGet.Config"

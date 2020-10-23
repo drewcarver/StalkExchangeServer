@@ -24,11 +24,11 @@ let getExchange (getExchange: DateTime -> Async<Exchange.Exchange option>) (week
             | None    -> Error (RequestErrors.NOT_FOUND "Market Week Not Found.")
   }
 
+let getExchangeBuilder = StalkExchangeRepository.getExchangeCollection () |> StalkExchangeRepository.getExchangeByWeek 
 
-let getExchangeHandler (weekStartDateString: string) : HttpHandler =
+let getExchangeHandler (getExchangeFromDb: DateTime -> Async<Exchange.Exchange option>) (weekStartDateString: string) : HttpHandler = 
   fun (next : HttpFunc) (ctx : HttpContext) ->
     task {
-      let getExchangeFromDb = StalkExchangeRepository.getExchangeCollection () |> StalkExchangeRepository.getExchangeByWeek 
       let! result = parseDate weekStartDateString >>= validateWeekStartDate >>=! (getExchange getExchangeFromDb)
 
       return! match result with
