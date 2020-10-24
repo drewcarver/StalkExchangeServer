@@ -18,7 +18,7 @@ let app : HttpHandler =
 
     POST  >=> route "/api/exchange" >=> warbler (fun _ -> createExchangeHandler)
 
-    GET   >=> routef "/api/exchange/%s" getExchangeHandler
+    GET   >=> routef "/api/exchange/%s" (getExchangeHandler getExchangeBuilder)
 
     POST  >=> routef "/api/exchange/%s/markets" createMarketHandler
 
