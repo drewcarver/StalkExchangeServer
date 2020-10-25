@@ -45,7 +45,11 @@ let updateMarketHandler (weekStartDateString: string) (username: string): HttpHa
     task {
       let! marketModel = ctx.BindJsonAsync<MarketModel>()
       let market = toMarket username marketModel
-      let! result = parseDate weekStartDateString >>=! updateMarket market
+      let parsedDate = 
+        match parseDate weekStartDateString with
+        | Some parsedDate   -> Ok parsedDate
+        | None              -> Error (RequestErrors.BAD_REQUEST "Invalid Date.")
+      let! result = parsedDate >>=! updateMarket market
 
       return! match result with
               | Ok r  -> Successful.CREATED (Exchange.toExchangeResponse r) next ctx

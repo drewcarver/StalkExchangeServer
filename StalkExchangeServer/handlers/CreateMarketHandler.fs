@@ -26,7 +26,11 @@ let createMarketHandler (weekStartDateString: string): HttpHandler =
   fun (next : HttpFunc) (ctx : HttpContext) ->
     task {
       let! createExchangeModel = ctx.BindJsonAsync<CreateExchangeModel>()
-      let! result = parseDate weekStartDateString >>=! createMarket createExchangeModel.UserName
+      let parsedDate = 
+        match parseDate weekStartDateString with
+        | Some parsedDate   -> Ok parsedDate
+        | None              -> Error (RequestErrors.BAD_REQUEST "Invalid Date.")
+      let! result = parsedDate >>=! createMarket createExchangeModel.UserName
 
       return! match result with
               | Ok r  -> Successful.CREATED r next ctx

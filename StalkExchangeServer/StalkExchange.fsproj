@@ -5,6 +5,7 @@
   <ItemGroup>
     <Compile Include="utilities/ResultUtilities.fs" />
     <Compile Include="utilities/DateUtility.fs" />
+    <Compile Include="utilities/QueryStringUtility.fs" />
     <Compile Include="models/Bells.fs" />
     <Compile Include="models/Market.fs" />
     <Compile Include="models/Exchange.fs" />
@@ -25,6 +26,7 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Aether" Version="8.3.1" />
     <PackageReference Include="FsUnit" Version="4.0.1" />
     <PackageReference Include="Giraffe" Version="4.1.0" />
     <PackageReference Include="Microsoft.Azure.Functions.Extensions" Version="1.0.0" />

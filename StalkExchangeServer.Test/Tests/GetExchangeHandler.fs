@@ -4,13 +4,10 @@ open GetExchangeHandler
 open Xunit
 open FsUnit
 open System
-open Newtonsoft.Json.Bson
 open MongoDB.Bson
 open System.Threading.Tasks
 open FSharp.Control.Tasks.V2
 open Microsoft.AspNetCore.Http
-open Newtonsoft.Json
-open Newtonsoft.Json.Serialization
 open GiraffeTestUtilities
 
 
@@ -21,13 +18,13 @@ let dummyExchange: Exchange.Exchange =
         Markets = [||];
     } 
 
-let getExistingExchangeMock (weekStartDate: DateTime) = Some dummyExchange |> Task.FromResult |> Async.AwaitTask 
-let getMissingExchangeMock (weekStartDate: DateTime): Async<Exchange.Exchange option> = None |> Task.FromResult |> Async.AwaitTask 
+let getExistingExchangeMock (weekStartDate: DateTime) = Some dummyExchange |> Task.FromResult  
+let getMissingExchangeMock (weekStartDate: DateTime) = None |> Task.FromResult 
 
 [<Fact>]
 let ``Should return an exchange`` () =
     let handler = getExchangeHandler getExistingExchangeMock
-    let context = buildMockContext()
+    let context = buildMockContext None
         
     task {
         let! response = (handler "2020-10-18T00:00:00Z") next context
@@ -43,7 +40,7 @@ let ``Should return an exchange`` () =
 [<Fact>]
 let ``Should not return an exchange when it is missing`` () =
     let handler = getExchangeHandler getMissingExchangeMock
-    let context = buildMockContext()
+    let context = buildMockContext None
         
     task {
         let! response = (handler "2020-10-18T00:00:00Z") next context
@@ -60,7 +57,7 @@ let ``Should not return an exchange when it is missing`` () =
 [<Fact>]
 let ``Should return bad request when the date is invalid`` () =
     let handler = getExchangeHandler getMissingExchangeMock
-    let context = buildMockContext()
+    let context = buildMockContext None
         
     task {
         let invalidDateString = "INVALID_DATE"
@@ -78,7 +75,7 @@ let ``Should return bad request when the date is invalid`` () =
 [<Fact>]
 let ``Should return bad request when the supplied date is not a Sunday`` () =
     let handler = getExchangeHandler getMissingExchangeMock
-    let context = buildMockContext()
+    let context = buildMockContext None
         
     task {
         let invalidDateString = "2020-10-19T00:00:00Z"

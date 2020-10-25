@@ -30,7 +30,11 @@ let getExchangeBuilder = StalkExchangeRepository.getExchangeCollection () |> Sta
 let getExchangeHandler (getExchangeFromDb: DateTime -> Task<Exchange.Exchange option>) (weekStartDateString: string) : HttpHandler = 
   fun (next : HttpFunc) (ctx : HttpContext) ->
     task {
-      let! result = parseDate weekStartDateString >>= validateWeekStartDate >>=! (getExchange getExchangeFromDb)
+      let parsedDate = 
+        match parseDate weekStartDateString with
+        | Some parsedDate   -> Ok parsedDate
+        | None              -> Error (RequestErrors.BAD_REQUEST "Invalid Date.")
+      let! result = parsedDate >>= validateWeekStartDate >>=! (getExchange getExchangeFromDb)
 
       return! match result with
               | Ok exchange  -> Successful.OK (Exchange.toExchangeResponse exchange) next ctx

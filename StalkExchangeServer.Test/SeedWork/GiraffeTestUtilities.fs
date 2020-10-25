@@ -15,15 +15,26 @@ open System.IO
 open System.Text
 open Newtonsoft.Json
 open Newtonsoft.Json.Serialization
+open System.Collections.Generic
+open Microsoft.Extensions.Primitives
 
 let next : HttpFunc = Some >> Task.FromResult
 
-let buildMockContext () =
+let toQueryStringCollection (querystringParams : Map<string, StringValues>) = 
+    querystringParams 
+        |> Dictionary 
+        |> QueryCollection
+
+let buildMockContext (querystringParameters : Map<string, StringValues> option) =
     let context = Substitute.For<HttpContext>()
     context.RequestServices.GetService(typeof<INegotiationConfig>).Returns(DefaultNegotiationConfig()) |> ignore
     context.RequestServices.GetService(typeof<Json.IJsonSerializer>).Returns(NewtonsoftJsonSerializer(NewtonsoftJsonSerializer.DefaultSettings)) |> ignore
     context.Request.Headers.ReturnsForAnyArgs(HeaderDictionary()) |> ignore
     context.Response.Body <- new MemoryStream()
+    context.Request.Query <- 
+        match querystringParameters with
+            | Some qsp  -> toQueryStringCollection qsp
+            | None      -> QueryCollection()
     context
 
 let getBody (ctx : HttpContext) =
