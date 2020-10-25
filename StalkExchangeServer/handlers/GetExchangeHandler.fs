@@ -6,6 +6,7 @@ open FSharp.Control.Tasks.V2
 open System
 open ResultUtilities
 open DateUtility
+open System.Threading.Tasks
 
 
 let validateWeekStartDate (weekStartDate: DateTime) =
@@ -15,7 +16,7 @@ let validateWeekStartDate (weekStartDate: DateTime) =
     then Ok weekStartDate 
     else Error (RequestErrors.BAD_REQUEST (sprintf "Please Provide a Valid Week Start Date. The Date Provided Is Not a Sunday. Instead Was Given: %s" dayOfWeek))
 
-let getExchange (getExchange: DateTime -> Async<Exchange.Exchange option>) (weekStartDate: DateTime) = 
+let getExchange (getExchange: DateTime -> Task<Exchange.Exchange option>) (weekStartDate: DateTime) = 
   task { 
     let! markets = getExchange weekStartDate
 
@@ -26,7 +27,7 @@ let getExchange (getExchange: DateTime -> Async<Exchange.Exchange option>) (week
 
 let getExchangeBuilder = StalkExchangeRepository.getExchangeCollection () |> StalkExchangeRepository.getExchangeByWeek 
 
-let getExchangeHandler (getExchangeFromDb: DateTime -> Async<Exchange.Exchange option>) (weekStartDateString: string) : HttpHandler = 
+let getExchangeHandler (getExchangeFromDb: DateTime -> Task<Exchange.Exchange option>) (weekStartDateString: string) : HttpHandler = 
   fun (next : HttpFunc) (ctx : HttpContext) ->
     task {
       let! result = parseDate weekStartDateString >>= validateWeekStartDate >>=! (getExchange getExchangeFromDb)

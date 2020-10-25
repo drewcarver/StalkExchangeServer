@@ -10,6 +10,7 @@ open Exchange
 open Market
 open Bells
 open System
+open Microsoft.FSharp.Collections
 
 [<Literal>]
 let DbName = "stalkExchange"
@@ -28,14 +29,23 @@ let filterCurrentExchangeById marketId = Builders<Exchange>.Filter.Eq((fun m -> 
 let filterCurrentExchangeByStartDate marketStartDate = Builders<Exchange>.Filter.Eq((fun m -> m.WeekStartDate), marketStartDate)
 let filterByMarketUsername username = Builders<Exchange>.Filter.ElemMatch((fun e -> e.Markets), (fun (m: Market.Market) -> m.UserName = username))
 
+let getExchanges (exchangeCollection: IMongoCollection<Exchange>) = 
+    task {
+        let! exchanges = exchangeCollection.FindAsync<Exchange>(Builders<Exchange>.Filter.Empty)
+
+        return exchanges.ToEnumerable()
+            |> Enumerable.ToArray
+            |> Array.toList
+    } 
+
 let getExchangeByWeek (exchangeCollection: IMongoCollection<Exchange>) (weekStartDate: DateTime) = 
     task {
-        let! markets = exchangeCollection.FindAsync<Exchange>(filterCurrentExchangeByStartDate weekStartDate)
+        let! exchanges = exchangeCollection.FindAsync<Exchange>(filterCurrentExchangeByStartDate weekStartDate)
 
-        return markets.ToEnumerable()
+        return exchanges.ToEnumerable()
             |> Enumerable.ToArray 
             |> Array.tryHead
-    } |> Async.AwaitTask
+    } 
 
 let getMarketById (exchangeCollection: IMongoCollection<Exchange>) (marketId: BsonObjectId) =
     task {
@@ -44,7 +54,7 @@ let getMarketById (exchangeCollection: IMongoCollection<Exchange>) (marketId: Bs
         return markets.ToEnumerable()
             |> Enumerable.ToArray
             |> Array.tryHead
-    } |> Async.AwaitTask
+    } 
 
 let createExchange (weekStartDate: DateTime) (exchangeCollection: IMongoCollection<Exchange>) =
         try

@@ -11,18 +11,21 @@ open GetExchangeHandler
 open CreateExchangeHandler
 open CreateMarketHandler
 open UpdateMarketHandler
+open GetExchangesHandler
 
 let app : HttpHandler =
 
   choose [
 
-    POST  >=> route "/api/exchange" >=> warbler (fun _ -> createExchangeHandler)
+    POST  >=> route "/api/exchanges" >=> warbler (fun _ -> createExchangeHandler)
 
-    GET   >=> routef "/api/exchange/%s" (getExchangeHandler getExchangeBuilder)
+    GET   >=> route "/api/exchanges" >=> warbler (fun _ -> getExchangesHandler getExchangesBuilder)
 
-    POST  >=> routef "/api/exchange/%s/markets" createMarketHandler
+    GET   >=> routef "/api/exchanges/%s" (getExchangeHandler getExchangeBuilder)
 
-    PUT   >=> routef "/api/exchange/%s/markets/%s" (fun (weekStartDate, username) -> updateMarketHandler weekStartDate username)
+    POST  >=> routef "/api/exchanges/%s/markets" createMarketHandler
+
+    PUT   >=> routef "/api/exchanges/%s/markets/%s" (fun (weekStartDate, username) -> updateMarketHandler weekStartDate username)
 
     RequestErrors.NOT_FOUND "Not Found"
 

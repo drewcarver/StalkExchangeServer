@@ -11,6 +11,7 @@
     <Compile Include="StalkExchangeRepository.fs" />
     <Compile Include="handlers/CreateExchangeHandler.fs" />
     <Compile Include="handlers/GetExchangeHandler.fs" />
+    <Compile Include="handlers/GetExchangesHandler.fs" />
     <Compile Include="handlers/CreateMarketHandler.fs" />
     <Compile Include="handlers/UpdateMarketHandler.fs" />
     <Compile Include="Run.fs" />
