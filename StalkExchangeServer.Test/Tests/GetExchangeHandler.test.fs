@@ -15,6 +15,7 @@ open Giraffe.Serialization
 open System.IO
 open System.Text
 open Newtonsoft.Json
+open Newtonsoft.Json.Serialization
 
 let next : HttpFunc = Some >> Task.FromResult
 
@@ -34,22 +35,46 @@ let getBody (ctx : HttpContext) =
 let dummyExchange: Exchange.Exchange = 
     {
         Id = BsonObjectId(ObjectId.GenerateNewId());
-        WeekStartDate = DateTime(2020, 10, 18);
+        WeekStartDate = DateTime.SpecifyKind(DateTime(2020, 10, 18), DateTimeKind.Utc);
         Markets = [||];
     } 
 
 let getExistingExchangeMock (weekStartDate: DateTime) = Some dummyExchange |> Task.FromResult |> Async.AwaitTask 
 let getMissingExchangeMock (weekStartDate: DateTime): Async<Exchange.Exchange option> = None |> Task.FromResult |> Async.AwaitTask 
 
+let camelContractResolver =  DefaultContractResolver(NamingStrategy = CamelCaseNamingStrategy ())
+let jsonSerializerSettings = JsonSerializerSettings(ContractResolver = camelContractResolver)
+let serializeToCamelCaseJsonString value = JsonConvert.SerializeObject(value, jsonSerializerSettings)
+
 [<Fact>]
-let ``Should return not found when exchange is missing`` () =
+let ``Should return an exchange`` () =
     let handler = getExchangeHandler getExistingExchangeMock
     let context = buildMockContext()
         
     task {
         let! response = (handler "2020-10-18T00:00:00Z") next context
-        Assert.True(response.IsSome)
+        response.IsSome |> should equal true
+
         let context = response.Value
         let body = getBody context
-        Assert.Equal(JsonConvert.SerializeObject(dummyExchange), body)
+        let expected = serializeToCamelCaseJsonString dummyExchange
+
+        body |> should equal expected
+    }
+
+[<Fact>]
+let ``Should not return an exchange when it is missing`` () =
+    let handler = getExchangeHandler getMissingExchangeMock
+    let context = buildMockContext()
+        
+    task {
+        let! response = (handler "2020-10-18T00:00:00Z") next context
+        response.IsSome |> should equal true
+
+        let context = response.Value
+        let body = getBody context
+        let expected = "\"Market Week Not Found.\""
+
+        body |> should equal expected
+        response.Value.Response.StatusCode |> should equal StatusCodes.Status404NotFound
     }
