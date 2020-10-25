@@ -7,4 +7,4 @@ let parseDate (dateString: string) =
 
   if couldParse 
     then Ok parsedDate 
-    else Error (RequestErrors.NOT_FOUND "Invalid Date.")
+    else Error (RequestErrors.BAD_REQUEST "Invalid Date.")

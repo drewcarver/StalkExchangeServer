@@ -8,29 +8,11 @@ open Newtonsoft.Json.Bson
 open MongoDB.Bson
 open System.Threading.Tasks
 open FSharp.Control.Tasks.V2
-open Giraffe
-open NSubstitute
 open Microsoft.AspNetCore.Http
-open Giraffe.Serialization
-open System.IO
-open System.Text
 open Newtonsoft.Json
 open Newtonsoft.Json.Serialization
+open GiraffeTestUtilities
 
-let next : HttpFunc = Some >> Task.FromResult
-
-let buildMockContext () =
-    let context = Substitute.For<HttpContext>()
-    context.RequestServices.GetService(typeof<INegotiationConfig>).Returns(DefaultNegotiationConfig()) |> ignore
-    context.RequestServices.GetService(typeof<Json.IJsonSerializer>).Returns(NewtonsoftJsonSerializer(NewtonsoftJsonSerializer.DefaultSettings)) |> ignore
-    context.Request.Headers.ReturnsForAnyArgs(HeaderDictionary()) |> ignore
-    context.Response.Body <- new MemoryStream()
-    context
-
-let getBody (ctx : HttpContext) =
-    ctx.Response.Body.Position <- 0L
-    use reader = new StreamReader(ctx.Response.Body, Encoding.UTF8)
-    reader.ReadToEnd()
 
 let dummyExchange: Exchange.Exchange = 
     {
@@ -41,10 +23,6 @@ let dummyExchange: Exchange.Exchange =
 
 let getExistingExchangeMock (weekStartDate: DateTime) = Some dummyExchange |> Task.FromResult |> Async.AwaitTask 
 let getMissingExchangeMock (weekStartDate: DateTime): Async<Exchange.Exchange option> = None |> Task.FromResult |> Async.AwaitTask 
-
-let camelContractResolver =  DefaultContractResolver(NamingStrategy = CamelCaseNamingStrategy ())
-let jsonSerializerSettings = JsonSerializerSettings(ContractResolver = camelContractResolver)
-let serializeToCamelCaseJsonString value = JsonConvert.SerializeObject(value, jsonSerializerSettings)
 
 [<Fact>]
 let ``Should return an exchange`` () =
@@ -77,4 +55,40 @@ let ``Should not return an exchange when it is missing`` () =
 
         body |> should equal expected
         response.Value.Response.StatusCode |> should equal StatusCodes.Status404NotFound
+    }
+
+[<Fact>]
+let ``Should return bad request when the date is invalid`` () =
+    let handler = getExchangeHandler getMissingExchangeMock
+    let context = buildMockContext()
+        
+    task {
+        let invalidDateString = "INVALID_DATE"
+        let! response = (handler invalidDateString) next context
+        response.IsSome |> should equal true
+
+        let context = response.Value
+        let body = getBody context
+        let expected = "\"Invalid Date.\""
+
+        body |> should equal expected
+        response.Value.Response.StatusCode |> should equal StatusCodes.Status400BadRequest
+    }
+
+[<Fact>]
+let ``Should return bad request when the supplied date is not a Sunday`` () =
+    let handler = getExchangeHandler getMissingExchangeMock
+    let context = buildMockContext()
+        
+    task {
+        let invalidDateString = "2020-10-19T00:00:00Z"
+        let! response = (handler invalidDateString) next context
+        response.IsSome |> should equal true
+
+        let context = response.Value
+        let body = getBody context
+        let expected = "\"Please Provide a Valid Week Start Date. The Date Provided Is Not a Sunday. Instead Was Given: Monday\""
+
+        body |> should equal expected
+        response.Value.Response.StatusCode |> should equal StatusCodes.Status400BadRequest
     }

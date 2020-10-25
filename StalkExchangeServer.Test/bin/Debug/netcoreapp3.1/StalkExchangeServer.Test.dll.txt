@@ -1,1 +1,4 @@
-GetExchangeHandlerTest.Should return not found when exchange is missing
+GetExchangeHandlerTest.Should return an exchange
+GetExchangeHandlerTest.Should not return an exchange when it is missing
+GetExchangeHandlerTest.Should return bad request when the date is invalid
+GetExchangeHandlerTest.Should return bad request when the supplied date is not a Sunday

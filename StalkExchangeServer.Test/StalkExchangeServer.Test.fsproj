@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
@@ -6,7 +6,11 @@
     <ProjectReference Include="..\StalkExchangeServer\StalkExchange.fsproj" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="SeedWork/GiraffeTestUtilities.fs" />
     <Compile Include="Tests/GetExchangeHandler.test.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <DotNetCliToolReference Include="Microsoft.DotNet.Watcher.Tools" Version="1.0.0" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="FsUnit" Version="4.0.1" />
