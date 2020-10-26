@@ -42,9 +42,9 @@ let getExchanges (exchangeCollection: IMongoCollection<Exchange>) (weekStartDate
             |> Array.toList
     } 
 
-let getExchangeByWeek (exchangeCollection: IMongoCollection<Exchange>) (weekStartDate: DateTime) = 
+let getExchangeById (exchangeCollection: IMongoCollection<Exchange>) (exchangeId: string) = 
     task {
-        let! exchanges = exchangeCollection.FindAsync<Exchange>(filterCurrentExchangeByStartDate weekStartDate)
+        let! exchanges = exchangeCollection.FindAsync<Exchange>(filterCurrentExchangeById (BsonObjectId.Create exchangeId))
 
         return exchanges.ToEnumerable()
             |> Enumerable.ToArray 

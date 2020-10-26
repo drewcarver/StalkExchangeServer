@@ -3,5 +3,3 @@ GetExchangesHandlerTest.Should filter exchanges by week start date
 GetExchangesHandlerTest.Should return bad request when the start date is not a Sunday
 GetExchangeHandlerTest.Should return an exchange
 GetExchangeHandlerTest.Should not return an exchange when it is missing
-GetExchangeHandlerTest.Should return bad request when the date is invalid
-GetExchangeHandlerTest.Should return bad request when the supplied date is not a Sunday

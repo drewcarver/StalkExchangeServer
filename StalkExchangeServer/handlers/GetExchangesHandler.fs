@@ -5,7 +5,6 @@ open Microsoft.AspNetCore.Http
 open FSharp.Control.Tasks.V2
 open System.Threading.Tasks
 open System
-open System.Linq
 open Microsoft.FSharp.Collections
 
 let getExchangesBuilder (weekStartDate: DateTime option) = 

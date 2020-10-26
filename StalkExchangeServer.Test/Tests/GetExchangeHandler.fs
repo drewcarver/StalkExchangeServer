@@ -18,8 +18,8 @@ let dummyExchange: Exchange.Exchange =
         Markets = [||];
     } 
 
-let getExistingExchangeMock (weekStartDate: DateTime) = Some dummyExchange |> Task.FromResult  
-let getMissingExchangeMock (weekStartDate: DateTime) = None |> Task.FromResult 
+let getExistingExchangeMock (exchangeId: string) = Some dummyExchange |> Task.FromResult  
+let getMissingExchangeMock (exchangeId: string) = None |> Task.FromResult 
 
 [<Fact>]
 let ``Should return an exchange`` () =
@@ -27,7 +27,7 @@ let ``Should return an exchange`` () =
     let context = buildMockContext None
         
     task {
-        let! response = (handler "2020-10-18T00:00:00Z") next context
+        let! response = (handler "123") next context
         response.IsSome |> should equal true
 
         let context = response.Value
@@ -43,7 +43,7 @@ let ``Should not return an exchange when it is missing`` () =
     let context = buildMockContext None
         
     task {
-        let! response = (handler "2020-10-18T00:00:00Z") next context
+        let! response = (handler "123") next context
         response.IsSome |> should equal true
 
         let context = response.Value
@@ -52,40 +52,4 @@ let ``Should not return an exchange when it is missing`` () =
 
         body |> should equal expected
         response.Value.Response.StatusCode |> should equal StatusCodes.Status404NotFound
-    }
-
-[<Fact>]
-let ``Should return bad request when the date is invalid`` () =
-    let handler = getExchangeHandler getMissingExchangeMock
-    let context = buildMockContext None
-        
-    task {
-        let invalidDateString = "INVALID_DATE"
-        let! response = (handler invalidDateString) next context
-        response.IsSome |> should equal true
-
-        let context = response.Value
-        let body = getBody context
-        let expected = "\"Invalid Date.\""
-
-        body |> should equal expected
-        response.Value.Response.StatusCode |> should equal StatusCodes.Status400BadRequest
-    }
-
-[<Fact>]
-let ``Should return bad request when the supplied date is not a Sunday`` () =
-    let handler = getExchangeHandler getMissingExchangeMock
-    let context = buildMockContext None
-        
-    task {
-        let invalidDateString = "2020-10-19T00:00:00Z"
-        let! response = (handler invalidDateString) next context
-        response.IsSome |> should equal true
-
-        let context = response.Value
-        let body = getBody context
-        let expected = "\"Please Provide a Valid Week Start Date. The Date Provided Is Not a Sunday. Instead Was Given: Monday\""
-
-        body |> should equal expected
-        response.Value.Response.StatusCode |> should equal StatusCodes.Status400BadRequest
     }
