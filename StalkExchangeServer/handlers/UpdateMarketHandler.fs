@@ -3,10 +3,11 @@ module UpdateMarketHandler
 open System
 open FSharp.Control.Tasks.V2
 open Microsoft.AspNetCore.Http
-open DateUtility
 open Giraffe
-open ResultUtilities
 open Bells
+open Market
+open System.Threading.Tasks
+open StalkExchangeRepository
 
 [<CLIMutable>]
 type MarketModel = {
@@ -31,27 +32,18 @@ let toMarket (username: string) (market: MarketModel) : Market.Market =
       SaturdayPrice   = Option.ofNullable(market.SaturdayPrice);
   }
 
-let updateMarket (market: Market.Market) (weekStartDate: DateTime) = 
-  task { 
-    let! exchange = StalkExchangeRepository.getExchangeCollection () |> StalkExchangeRepository.updateMarket weekStartDate market 
+let updateMarketBuilder = getExchangeCollection () |> updateMarket
 
-    return match exchange with
-            | Some e  -> Ok e 
-            | None    -> Error (RequestErrors.CONFLICT "Unable to update market.")
-  }
-
-let updateMarketHandler (weekStartDateString: string) (username: string): HttpHandler =
+let updateMarketHandler (updateMarket: string -> Market -> Task<MarketUpdate>) (exchangeId: string) (username: string): HttpHandler =
   fun (next : HttpFunc) (ctx : HttpContext) ->
     task {
       let! marketModel = ctx.BindJsonAsync<MarketModel>()
       let market = toMarket username marketModel
-      let parsedDate = 
-        match parseDate weekStartDateString with
-        | Some parsedDate   -> Ok parsedDate
-        | None              -> Error (RequestErrors.BAD_REQUEST "Invalid Date.")
-      let! result = parsedDate >>=! updateMarket market
+
+      let! result = updateMarket exchangeId market
 
       return! match result with
-              | Ok r  -> Successful.CREATED (Exchange.toExchangeResponse r) next ctx
-              | Error e -> ServerErrors.INTERNAL_ERROR e next ctx
+              | Success e  -> Successful.OK (Exchange.toExchangeResponse e) next ctx
+              | Error      -> ServerErrors.INTERNAL_ERROR "Unexpected server error" next ctx
+              | NotFound   -> RequestErrors.NOT_FOUND "Unable to update market. Exchange does not exist." next ctx
     }

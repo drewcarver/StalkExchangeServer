@@ -9,6 +9,7 @@
     <Compile Include="SeedWork/GiraffeTestUtilities.fs" />
     <Compile Include="Tests/GetExchangeHandler.fs" />
     <Compile Include="Tests/CreateExchangeHandler.fs" />
+    <Compile Include="Tests/UpdateMarketHandler.fs" />
     <Compile Include="Tests/GetExchangesHandler.fs" />
   </ItemGroup>
   <ItemGroup>

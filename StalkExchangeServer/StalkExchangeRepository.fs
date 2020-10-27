@@ -104,8 +104,15 @@ let createMarket (weekStartDate: DateTime) (username: string) (exchangeCollectio
             else Task.FromResult(None)
     } 
 
-let updateMarket (weekStartDate: DateTime) (market: Market.Market) (exchangeCollection: IMongoCollection<Exchange>) = 
-    let filter = Builders<Exchange>.Filter.And(filterCurrentExchangeByStartDate weekStartDate, filterByMarketUsername market.UserName)
+type MarketUpdate = 
+    | Success of Exchange
+    | NotFound
+    | Error
+
+let updateMarket (exchangeCollection: IMongoCollection<Exchange>) (exchangeId: string) (market: Market.Market) = 
+    let exchangeIdFilter = filterCurrentExchangeById (BsonObjectId.Create exchangeId)
+    let marketUsernameFilter = filterByMarketUsername market.UserName
+    let filter = Builders<Exchange>.Filter.And(exchangeIdFilter, marketUsernameFilter)
     let updateDefinition = Builders<Exchange>.Update.Set((fun e -> e.Markets.ElementAt(-1)), market)
     let options = UpdateOptions(IsUpsert = false)
     
@@ -114,11 +121,16 @@ let updateMarket (weekStartDate: DateTime) (market: Market.Market) (exchangeColl
         
         return! if result.IsAcknowledged
             then task { 
-                        let! markets = exchangeCollection.FindAsync<Exchange>(filterCurrentExchangeByStartDate weekStartDate)
+                let! markets = exchangeCollection.FindAsync<Exchange>(exchangeIdFilter)
 
-                        return markets.ToEnumerable()
-                            |> Enumerable.ToArray
-                            |> Array.tryHead
+                let updatedMarket = 
+                    markets.ToEnumerable()
+                    |> Enumerable.ToArray
+                    |> Array.tryHead
+                
+                return match updatedMarket with 
+                        | Some m    -> Success m
+                        | None      -> NotFound
             }
-            else Task.FromResult(None)
+            else Error |> Task.FromResult
     } 
