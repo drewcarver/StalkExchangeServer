@@ -34,5 +34,5 @@ let createMarketHandler (weekStartDateString: string): HttpHandler =
 
       return! match result with
               | Ok r  -> Successful.CREATED r next ctx
-              | Error e -> ServerErrors.INTERNAL_ERROR e next ctx
+              | Error e -> e next ctx
     }
