@@ -1,38 +1,28 @@
 module CreateMarketHandler
 
+open Exchange
 open Giraffe
 open Microsoft.AspNetCore.Http
 open FSharp.Control.Tasks.V2
-open System
-open DateUtility
-open ResultUtilities 
+open System.Threading.Tasks
+open StalkExchangeRepository
 
 [<CLIMutable>] 
-type CreateExchangeModel =
+type CreateMarketModel =
   { 
     UserName: string
   }
 
-let createMarket (username: string) (weekStartDate: DateTime) = 
-  task { 
-    let! exchange = StalkExchangeRepository.getExchangeCollection () |> StalkExchangeRepository.createMarket weekStartDate username
+let createMarketBuilder = getExchangeCollection () |> createMarket 
 
-    return match exchange with
-            | Some e  -> Ok e 
-            | None    -> Error (RequestErrors.CONFLICT "Unable to create market.")
-  }
-
-let createMarketHandler (weekStartDateString: string): HttpHandler =
+let createMarketHandler (createExchange: string -> string -> Task<MarketCreate>) (exchangeId: string): HttpHandler =
   fun (next : HttpFunc) (ctx : HttpContext) ->
     task {
-      let! createExchangeModel = ctx.BindJsonAsync<CreateExchangeModel>()
-      let parsedDate = 
-        match parseDate weekStartDateString with
-        | Some parsedDate   -> Ok parsedDate
-        | None              -> Error (RequestErrors.BAD_REQUEST "Invalid Date.")
-      let! result = parsedDate >>=! createMarket createExchangeModel.UserName
+      let! createExchangeModel = ctx.BindJsonAsync<CreateMarketModel>()
+      let! result = createExchange exchangeId createExchangeModel.UserName
 
       return! match result with
-              | Ok r  -> Successful.CREATED r next ctx
-              | Error e -> e next ctx
+              | MarketCreate.Success e          -> Successful.CREATED (toExchangeResponse e) next ctx
+              | MarketCreate.ExchangeNotFound   -> RequestErrors.NOT_FOUND "Exchange not found." next ctx
+              | MarketCreate.Error              -> ServerErrors.INTERNAL_ERROR "An internal error occurred." next ctx
     }

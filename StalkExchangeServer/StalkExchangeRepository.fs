@@ -76,7 +76,12 @@ let createExchange (exchangeCollection: IMongoCollection<Exchange>) (weekStartDa
         with
         | _ -> Error("An exchange with that start date already exists.") |> Task.FromResult
 
-let createMarket (weekStartDate: DateTime) (username: string) (exchangeCollection: IMongoCollection<Exchange>) = 
+type MarketCreate =
+    | Success of Exchange
+    | ExchangeNotFound
+    | Error
+
+let createMarket (exchangeCollection: IMongoCollection<Exchange>) (exchangeId: string) (username: string) = 
     let newMarket: Market = {
         UserName        = username
         PurchasePrice   = None
@@ -91,17 +96,22 @@ let createMarket (weekStartDate: DateTime) (username: string) (exchangeCollectio
     let options = UpdateOptions(IsUpsert = true)
     
     task {
-        let! result = exchangeCollection.UpdateOneAsync(filterCurrentExchangeByStartDate weekStartDate, updateDefinition, options)
+        let! result = exchangeCollection.UpdateOneAsync(filterCurrentExchangeById (BsonObjectId.Create exchangeId), updateDefinition, options)
         
         return! if result.IsAcknowledged
             then task { 
-                        let! markets = exchangeCollection.FindAsync<Exchange>(filterCurrentExchangeById (BsonObjectId(result.UpsertedId.AsObjectId)))
+                let! markets = exchangeCollection.FindAsync<Exchange>(filterCurrentExchangeById (BsonObjectId(result.UpsertedId.AsObjectId)))
 
-                        return markets.ToEnumerable()
-                            |> Enumerable.ToArray
-                            |> Array.tryHead
+                let result = 
+                    markets.ToEnumerable()
+                    |> Enumerable.ToArray
+                    |> Array.tryHead
+
+                return match result with
+                        | Some e    -> Success e
+                        | None      -> ExchangeNotFound
             }
-            else Task.FromResult(None)
+            else Error |> Task.FromResult
     } 
 
 type MarketUpdate = 

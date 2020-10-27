@@ -1,6 +1,8 @@
 GetExchangesHandlerTest.Should return exchanges
 GetExchangesHandlerTest.Should filter exchanges by week start date
 GetExchangesHandlerTest.Should return bad request when the start date is not a Sunday
+CreateMarketHandlerTest.Should return an exchange
+CreateMarketHandlerTest.Should not return an exchange when it is missing
 UpdateMarketHandlerTest.Should update a market
 UpdateMarketHandlerTest.Should return not found when the market does not exist
 UpdateMarketHandlerTest.Should return an error when an unrecoverable error occurs

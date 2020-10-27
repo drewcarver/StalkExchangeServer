@@ -23,7 +23,7 @@ let app : HttpHandler =
 
     GET   >=> routef "/api/exchanges/%s" (getExchangeHandler getExchangeBuilder)
 
-    POST  >=> routef "/api/exchanges/%s/markets" createMarketHandler
+    POST  >=> routef "/api/exchanges/%s/markets" (createMarketHandler createMarketBuilder)
 
     PUT   >=> routef "/api/exchanges/%s/markets/%s" (fun (weekStartDate, username) -> updateMarketHandler updateMarketBuilder weekStartDate username)
 
