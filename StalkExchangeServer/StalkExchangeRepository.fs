@@ -60,7 +60,7 @@ let getMarketById (exchangeCollection: IMongoCollection<Exchange>) (marketId: Bs
             |> Array.tryHead
     } 
 
-let createExchange (weekStartDate: DateTime) (exchangeCollection: IMongoCollection<Exchange>) =
+let createExchange (exchangeCollection: IMongoCollection<Exchange>) (weekStartDate: DateTime) =
         try
             task {
                 let! _ = exchangeCollection.InsertOneAsync {

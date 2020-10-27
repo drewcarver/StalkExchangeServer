@@ -17,7 +17,7 @@ let app : HttpHandler =
 
   choose [
 
-    POST  >=> route "/api/exchanges" >=> warbler (fun _ -> createExchangeHandler)
+    POST  >=> route "/api/exchanges" >=> warbler (fun _ -> createExchangeHandler createExchangeBuilder)
 
     GET   >=> route "/api/exchanges" >=> warbler (fun _ -> getExchangesHandler getExchangesBuilder)
 
