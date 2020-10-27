@@ -4,6 +4,8 @@ open Giraffe
 open Microsoft.AspNetCore.Http
 open FSharp.Control.Tasks.V2
 open System
+open Exchange
+open System.Threading.Tasks
 
 [<CLIMutable>] 
 type CreateExchangeModel =
@@ -11,13 +13,15 @@ type CreateExchangeModel =
     WeekStartDate : DateTime
   }
 
-let createExchangeHandler : HttpHandler =
+let createExchangeBuilder = StalkExchangeRepository.getExchangeCollection () |> StalkExchangeRepository.createExchange 
+
+let createExchangeHandler (createExchange: DateTime -> Task<Result<Exchange, string>>) =
   fun (next : HttpFunc) (ctx : HttpContext) ->
     task {
       let! createExchangeModel = ctx.BindJsonAsync<CreateExchangeModel>()
-      let! result = StalkExchangeRepository.getExchangeCollection () |> StalkExchangeRepository.createExchange createExchangeModel.WeekStartDate 
+      let! result = createExchange createExchangeModel.WeekStartDate
 
       return! match result with
               | Ok r  -> Successful.CREATED r next ctx
-              | Error e -> ServerErrors.INTERNAL_ERROR e next ctx
+              | Error e -> RequestErrors.CONFLICT e next ctx
     }
