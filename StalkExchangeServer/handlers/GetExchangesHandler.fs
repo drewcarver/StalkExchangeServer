@@ -34,7 +34,7 @@ let getExchangesHandler (getExchanges: DateTime option -> Task<Exchange.Exchange
       match exchangesResult with
       | Ok exchanges  -> task {
           let! exchangesResult = exchanges
-          let exchangesTransformed = exchangesResult |> Seq.map Exchange.toExchangeResponse 
+          let exchangesTransformed = exchangesResult 
 
           return! Successful.OK exchangesTransformed next ctx
         }
