@@ -100,7 +100,7 @@ let createMarket (exchangeCollection: IMongoCollection<Exchange>) (exchangeId: s
         
         return! if result.IsAcknowledged
             then task { 
-                let! markets = exchangeCollection.FindAsync<Exchange>(filterCurrentExchangeById (BsonObjectId(result.UpsertedId.AsObjectId)))
+                let! markets = exchangeCollection.FindAsync<Exchange>(filterCurrentExchangeById (BsonObjectId.Create exchangeId))
 
                 let result = 
                     markets.ToEnumerable()

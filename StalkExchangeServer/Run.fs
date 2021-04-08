@@ -25,7 +25,7 @@ let app : HttpHandler =
 
     POST  >=> routef "/api/exchanges/%s/markets" (createMarketHandler createMarketBuilder)
 
-    PUT   >=> routef "/api/exchanges/%s/markets/%s" (fun (weekStartDate, username) -> updateMarketHandler updateMarketBuilder weekStartDate username)
+    PUT   >=> routef "/api/exchanges/%s/markets/%s" (fun (exchangeId, username) -> updateMarketHandler updateMarketBuilder exchangeId username)
 
     RequestErrors.NOT_FOUND "Not Found"
 
